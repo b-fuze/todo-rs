@@ -201,8 +201,9 @@ fn main() -> Result<(), ()> {
     let xcu = Xcursor::open().unwrap();
     let dsp = unsafe { (xlb.XOpenDisplay)(null) };
     unsafe {
-        let cstr = CString::new("DMZ-Mac-Black").unwrap();
+        let cstr = CString::new("Bibata_Amber").unwrap();
         (xcu.XcursorLibraryLoadImages)(cstr.as_c_str().as_ptr(), null, 40);
+        (xcu.XcursorSetTheme)(dsp, cstr.as_c_str().as_ptr());
         let theme = CStr::from_ptr((xcu.XcursorGetTheme)(dsp)).to_str().to_owned().unwrap();
         println!("Current theme: {}", theme);
     };
