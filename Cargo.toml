@@ -7,5 +7,5 @@ edition = "2018"
 [dependencies]
 gtk = { git = "https://github.com/gtk-rs/gtk.git", features = ["v3_22"] }
 gdk = { git = "https://github.com/gtk-rs/gdk.git" }
-x11-dl = "2.18.3"
+gdk-sys = { git = "https://github.com/gtk-rs/sys.git" }
 

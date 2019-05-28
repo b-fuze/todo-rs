@@ -2,7 +2,6 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::cell::Ref;
 use std::ptr;
-use std::ffi::{CString, CStr};
 
 extern crate gtk;
 extern crate gdk;
@@ -26,17 +25,6 @@ use gtk::{
 use gdk::{
     Screen,
 };
-
-extern crate x11_dl;
-use x11_dl::xcursor::Xcursor;
-// {
-//     XcursorLibraryLoadCursors,
-// };
-use x11_dl::xlib::Display as XDisplay;
-use x11_dl::xlib::Xlib;
-// {
-//     XOpenDisplay,
-// };
 
 const STYLES: &'static str = "
 * {
@@ -83,11 +71,37 @@ entry {
 }
 ";
 
+use std::ffi;
+use std::ffi::{CString, CStr};
+use std::os::raw::{c_char, c_int};
+use gdk_sys::GdkDisplay;
+
+#[repr(C)]
+struct XDisplay {}
+
+extern "C" {
+    fn gdk_x11_get_default_xdisplay() -> *mut XDisplay;
+    fn gdk_x11_lookup_xdisplay(xdisplay: *mut XDisplay) -> *mut GdkDisplay;
+    fn gdk_x11_display_set_cursor_theme(display: *mut GdkDisplay, theme: *const c_char, size: c_int);
+}
+
 fn main() -> Result<(), ()> {
     if gtk::init().is_err() {
         println!("Failed to initialize GTK");
         return Ok(());
     }
+
+    unsafe {
+        // Get displays
+        let xdisplay = gdk_x11_get_default_xdisplay();
+        let gdk_display = gdk_x11_lookup_xdisplay(xdisplay);
+
+        // Theme name
+        let theme_name = CString::new("Bibata_Amber").unwrap();
+
+        // Set cursor theme
+        gdk_x11_display_set_cursor_theme(gdk_display, theme_name.as_c_str().as_ptr(), 0);
+    };
 
     let screen_width = Screen::width();
     let screen_height = Screen::height();
@@ -195,18 +209,6 @@ fn main() -> Result<(), ()> {
         &css_prov,
         gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
     );
-
-    let null: *const std::os::raw::c_char = ptr::null();
-    let xlb = Xlib::open().unwrap();
-    let xcu = Xcursor::open().unwrap();
-    let dsp = unsafe { (xlb.XOpenDisplay)(null) };
-    unsafe {
-        let cstr = CString::new("Bibata_Amber").unwrap();
-        (xcu.XcursorLibraryLoadImages)(cstr.as_c_str().as_ptr(), null, 40);
-        (xcu.XcursorSetTheme)(dsp, cstr.as_c_str().as_ptr());
-        let theme = CStr::from_ptr((xcu.XcursorGetTheme)(dsp)).to_str().to_owned().unwrap();
-        println!("Current theme: {}", theme);
-    };
 
     gtk::main();
     Ok(())
