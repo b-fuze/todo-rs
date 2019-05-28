@@ -1,0 +1,11 @@
+[package]
+name = "todo"
+version = "0.1.0"
+authors = ["b-fuze <b-fuze.root@live.com>"]
+edition = "2018"
+
+[dependencies]
+gtk = { git = "https://github.com/gtk-rs/gtk.git", features = ["v3_22"] }
+gdk = { git = "https://github.com/gtk-rs/gdk.git" }
+x11-dl = "2.18.3"
+
