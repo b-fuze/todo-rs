@@ -24,6 +24,11 @@ use gtk::{
 };
 use gdk::{
     Screen,
+    Display,
+    Window as GdkWindow,
+    WindowExt as GdkWindowExt,
+    WindowAttr as GdkWindowAttr,
+    Cursor,
 };
 
 const STYLES: &'static str = "
@@ -91,6 +96,7 @@ fn main() -> Result<(), ()> {
         return Ok(());
     }
 
+    // Set new cursor theme
     unsafe {
         // Get displays
         let xdisplay = gdk_x11_get_default_xdisplay();
@@ -100,13 +106,21 @@ fn main() -> Result<(), ()> {
         let theme_name = CString::new("Bibata_Amber").unwrap();
 
         // Set cursor theme
-        gdk_x11_display_set_cursor_theme(gdk_display, theme_name.as_c_str().as_ptr(), 0);
+        gdk_x11_display_set_cursor_theme(gdk_display, theme_name.as_c_str().as_ptr(), 40);
     };
 
     let screen_width = Screen::width();
     let screen_height = Screen::height();
     let window = Window::new(WindowType::Toplevel);
     window.set_title("TODO Attempt");
+
+    // Set new default cursor
+    let def_display = Display::get_default().unwrap();
+    let cursor = Cursor::new_from_name(&def_display, "default");
+    let win_attr = GdkWindowAttr::default();
+    let gdk_window: GdkWindow = GdkWindow::new(None, &win_attr);
+    window.set_parent_window(&gdk_window);
+    gdk_window.set_cursor(cursor.as_ref());
 
     let btn = Button::new_with_label("Add Item");
     let text = Entry::new();
@@ -132,10 +146,11 @@ fn main() -> Result<(), ()> {
     wrap.add(&list_scroll);
     wrap.add(&quit_btn_box);
 
-    window.set_position(WindowPosition::Center);
+    window.set_position(WindowPosition::CenterOnParent);
     window.set_default_size(screen_width, screen_height);
-    window.fullscreen();
     window.add(&wrap);
+    gdk_window.show();
+    gdk_window.fullscreen();
     window.show_all();
     
     let weak_list = list.downgrade();
