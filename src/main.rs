@@ -196,6 +196,16 @@ fn main() -> Result<(), ()> {
         gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
     );
 
+    let null: *const std::os::raw::c_char = ptr::null();
+    let xlb = Xlib::open().unwrap();
+    let xcu = Xcursor::open().unwrap();
+    let dsp = unsafe { (xlb.XOpenDisplay)(null) };
+    unsafe {
+        let cstr = CString::new("DMZ-Mac-Black").unwrap();
+        (xcu.XcursorLibraryLoadImages)(cstr.as_c_str().as_ptr(), null, 40);
+        let theme = CStr::from_ptr((xcu.XcursorGetTheme)(dsp)).to_str().to_owned().unwrap();
+        println!("Current theme: {}", theme);
+    };
 
     gtk::main();
     Ok(())
