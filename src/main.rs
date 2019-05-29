@@ -105,7 +105,7 @@ fn main() -> Result<(), ()> {
         let gdk_display = gdk_x11_lookup_xdisplay(xdisplay);
 
         // Theme name
-        let theme_name = CString::new("Bibata_Amber").unwrap();
+        let theme_name = CString::new("DMZ-White").unwrap();
 
         // Set cursor theme
         gdk_x11_display_set_cursor_theme(gdk_display, theme_name.as_c_str().as_ptr(), 96);
