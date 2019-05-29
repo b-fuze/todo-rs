@@ -28,6 +28,8 @@ use gdk::{
     Window as GdkWindow,
     WindowExt as GdkWindowExt,
     WindowAttr as GdkWindowAttr,
+    WindowType as GdkWindowType,
+    WindowWindowClass,
     Cursor,
 };
 
@@ -106,21 +108,17 @@ fn main() -> Result<(), ()> {
         let theme_name = CString::new("Bibata_Amber").unwrap();
 
         // Set cursor theme
-        gdk_x11_display_set_cursor_theme(gdk_display, theme_name.as_c_str().as_ptr(), 40);
+        gdk_x11_display_set_cursor_theme(gdk_display, theme_name.as_c_str().as_ptr(), 96);
     };
-
-    let screen_width = Screen::width();
-    let screen_height = Screen::height();
-    let window = Window::new(WindowType::Toplevel);
-    window.set_title("TODO Attempt");
 
     // Set new default cursor
     let def_display = Display::get_default().unwrap();
     let cursor = Cursor::new_from_name(&def_display, "default");
-    let win_attr = GdkWindowAttr::default();
-    let gdk_window: GdkWindow = GdkWindow::new(None, &win_attr);
-    window.set_parent_window(&gdk_window);
-    gdk_window.set_cursor(cursor.as_ref());
+    
+    let screen_width = Screen::width();
+    let screen_height = Screen::height();
+    let window = Window::new(WindowType::Popup);
+    window.set_title("TODO Attempt");
 
     let btn = Button::new_with_label("Add Item");
     let text = Entry::new();
@@ -149,9 +147,23 @@ fn main() -> Result<(), ()> {
     window.set_position(WindowPosition::CenterOnParent);
     window.set_default_size(screen_width, screen_height);
     window.add(&wrap);
-    gdk_window.show();
-    gdk_window.fullscreen();
     window.show_all();
+
+    let win = window.clone();
+    let set_cursor = RefCell::new(false);
+    window.connect_draw(move |_, _| {
+        {
+            let setc = set_cursor.borrow();
+            if *setc == false {
+                let gdkw = win.get_window().unwrap();
+                gdkw.set_cursor(cursor.as_ref());
+                win.present();
+            }
+        }
+
+        set_cursor.replace(true);
+        Inhibit(false)
+    });
     
     let weak_list = list.downgrade();
 
