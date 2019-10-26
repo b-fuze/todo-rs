@@ -30,19 +30,20 @@ use gdk::{
     WindowAttr as GdkWindowAttr,
     WindowType as GdkWindowType,
     WindowWindowClass,
-    Cursor,
+    // Cursor,
 };
 
 const STYLES: &'static str = "
 * {
-    -gtk-dpi: 300;
+    /* -gtk-dpi: 300; */
     -gtk-icon-theme: \"DMZ-Mac-Black\";
 }
 
 #box {
-    margin: 40px;
+    margin: 15px;
 }
 
+/*
 list {
     border-radius: 8px;
 }
@@ -61,20 +62,21 @@ button, entry {
     border-width: 3px;
     outline-width: 2px;
 }
+*/
 
 button.li-menu-button {
     background: transparent;
     border: none;
-    font-size: 45px;
+    font-size: 15px;
     letter-spacing: 7px;
 }
 
 popover {
-    padding: 20px;
+    padding: 10px;
 }
 
 entry {
-    padding: 20px 25px;
+    padding: 10px 15px;
 }
 ";
 
@@ -87,9 +89,9 @@ use gdk_sys::GdkDisplay;
 struct XDisplay {}
 
 extern "C" {
-    fn gdk_x11_get_default_xdisplay() -> *mut XDisplay;
-    fn gdk_x11_lookup_xdisplay(xdisplay: *mut XDisplay) -> *mut GdkDisplay;
-    fn gdk_x11_display_set_cursor_theme(display: *mut GdkDisplay, theme: *const c_char, size: c_int);
+    // fn gdk_x11_get_default_xdisplay() -> *mut XDisplay;
+    // fn gdk_x11_lookup_xdisplay(xdisplay: *mut XDisplay) -> *mut GdkDisplay;
+    // fn gdk_x11_display_set_cursor_theme(display: *mut GdkDisplay, theme: *const c_char, size: c_int);
 }
 
 fn main() -> Result<(), ()> {
@@ -99,25 +101,25 @@ fn main() -> Result<(), ()> {
     }
 
     // Set new cursor theme
-    unsafe {
-        // Get displays
-        let xdisplay = gdk_x11_get_default_xdisplay();
-        let gdk_display = gdk_x11_lookup_xdisplay(xdisplay);
+    // unsafe {
+    //     // Get displays
+    //     let xdisplay = gdk_x11_get_default_xdisplay();
+    //     let gdk_display = gdk_x11_lookup_xdisplay(xdisplay);
 
-        // Theme name
-        let theme_name = CString::new("Bibata_Amber").unwrap();
+    //     // Theme name
+    //     let theme_name = CString::new("Bibata_Amber").unwrap();
 
-        // Set cursor theme
-        gdk_x11_display_set_cursor_theme(gdk_display, theme_name.as_c_str().as_ptr(), 96);
-    };
+    //     // Set cursor theme
+    //     gdk_x11_display_set_cursor_theme(gdk_display, theme_name.as_c_str().as_ptr(), 96);
+    // };
 
     // Set new default cursor
-    let def_display = Display::get_default().unwrap();
-    let cursor = Cursor::new_from_name(&def_display, "default");
+    // let def_display = Display::get_default().unwrap();
+    // let cursor = Cursor::new_from_name(&def_display, "default");
     
     let screen_width = Screen::width();
     let screen_height = Screen::height();
-    let window = Window::new(WindowType::Popup);
+    let window = Window::new(WindowType::Toplevel);
     window.set_title("TODO Attempt");
 
     let btn = Button::new_with_label("Add Item");
@@ -145,25 +147,25 @@ fn main() -> Result<(), ()> {
     wrap.add(&quit_btn_box);
 
     window.set_position(WindowPosition::CenterOnParent);
-    window.set_default_size(screen_width, screen_height);
+    window.set_default_size(screen_width / 3, screen_height / 3);
     window.add(&wrap);
     window.show_all();
 
     let win = window.clone();
-    let set_cursor = RefCell::new(false);
-    window.connect_draw(move |_, _| {
-        {
-            let setc = set_cursor.borrow();
-            if *setc == false {
-                let gdkw = win.get_window().unwrap();
-                gdkw.set_cursor(cursor.as_ref());
-                win.present();
-            }
-        }
+    // let set_cursor = RefCell::new(false);
+    // window.connect_draw(move |_, _| {
+    //     {
+    //         let setc = set_cursor.borrow();
+    //         if *setc == false {
+    //             let gdkw = win.get_window().unwrap();
+    //             gdkw.set_cursor(cursor.as_ref());
+    //             win.present();
+    //         }
+    //     }
 
-        set_cursor.replace(true);
-        Inhibit(false)
-    });
+    //     set_cursor.replace(true);
+    //     Inhibit(false)
+    // });
     
     let weak_list = list.downgrade();
 
